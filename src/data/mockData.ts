@@ -21,10 +21,8 @@ export interface Alert {
 
 export interface EnergyData {
   time: string;
-  grid: number;
-  solar: number;
-  diesel: number;
-  total: number;
+  actual: number;
+  target: number;
 }
 
 export interface ProcessData {
