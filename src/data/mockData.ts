@@ -69,12 +69,12 @@ export const lineEnergyData = [
 ];
 
 export const equipmentEnergyData = [
-  { equipment: "Compressor A", line: "Line 1", consumption: 890, status: "Running" },
-  { equipment: "Dryer B", line: "Line 1", consumption: 650, status: "Running" },
-  { equipment: "Motor C", line: "Line 2", consumption: 1120, status: "Running" },
-  { equipment: "Furnace D", line: "Line 3", consumption: 1540, status: "Idle" },
-  { equipment: "Pump E", line: "Line 4", consumption: 320, status: "Running" },
-  { equipment: "Conveyor F", line: "Line 5", consumption: 210, status: "Maintenance" },
+  { equipment: "Compressor A", line: "Line 1", consumption: 890, cost: 7120, status: "Running" },
+  { equipment: "Dryer B", line: "Line 1", consumption: 650, cost: 5200, status: "Running" },
+  { equipment: "Motor C", line: "Line 2", consumption: 1120, cost: 8960, status: "Running" },
+  { equipment: "Furnace D", line: "Line 3", consumption: 1540, cost: 12320, status: "Idle" },
+  { equipment: "Pump E", line: "Line 4", consumption: 320, cost: 2560, status: "Running" },
+  { equipment: "Conveyor F", line: "Line 5", consumption: 210, cost: 1680, status: "Maintenance" },
 ];
 
 export const processData: ProcessData[] = Array.from({ length: 50 }, (_, i) => ({
@@ -116,13 +116,13 @@ export const alertsData: Alert[] = [
 ];
 
 export const weeklyEnergyData = [
-  { day: "Mon", grid: 7200, solar: 3100, diesel: 800 },
-  { day: "Tue", grid: 7500, solar: 3400, diesel: 600 },
-  { day: "Wed", grid: 7890, solar: 3240, diesel: 1350 },
-  { day: "Thu", grid: 7100, solar: 2900, diesel: 900 },
-  { day: "Fri", grid: 7650, solar: 3300, diesel: 700 },
-  { day: "Sat", grid: 4200, solar: 2800, diesel: 200 },
-  { day: "Sun", grid: 3100, solar: 2500, diesel: 100 },
+  { day: "Mon", actual: 11100, target: 10500 },
+  { day: "Tue", actual: 11500, target: 10500 },
+  { day: "Wed", actual: 12480, target: 10500 },
+  { day: "Thu", actual: 10900, target: 10500 },
+  { day: "Fri", actual: 11650, target: 10500 },
+  { day: "Sat", actual: 7200, target: 7000 },
+  { day: "Sun", actual: 5700, target: 5500 },
 ];
 
 export const monthlyEnergyData = [
