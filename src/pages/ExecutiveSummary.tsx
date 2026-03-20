@@ -2,7 +2,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import KpiCard from "@/components/KpiCard";
 import { kpiData, energyTrendData } from "@/data/mockData";
 import { Zap, DollarSign, Package, Gauge, Droplets, Wind, AlertTriangle } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, Legend } from "recharts";
 import { motion } from "framer-motion";
 
 const ExecutiveSummary = () => {
