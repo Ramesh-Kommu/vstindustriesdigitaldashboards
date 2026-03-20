@@ -27,22 +27,17 @@ const ExecutiveSummary = () => {
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={energyTrendData}>
               <defs>
-                <linearGradient id="gridGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(260, 60%, 55%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(260, 60%, 55%)" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="solarGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(48, 96%, 53%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(48, 96%, 53%)" stopOpacity={0} />
+                <linearGradient id="actualGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(210, 100%, 50%)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(210, 100%, 50%)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 14%, 22%)" />
-              <XAxis dataKey="time" stroke="hsl(215, 15%, 55%)" tick={{ fontSize: 11 }} />
-              <YAxis stroke="hsl(215, 15%, 55%)" tick={{ fontSize: 11 }} />
+              <XAxis dataKey="time" stroke="hsl(215, 15%, 55%)" tick={{ fontSize: 11 }} label={{ value: "Date-Time", position: "insideBottom", offset: -2, fontSize: 11, fill: "hsl(215, 15%, 55%)" }} />
+              <YAxis stroke="hsl(215, 15%, 55%)" tick={{ fontSize: 11 }} label={{ value: "KW", angle: -90, position: "insideLeft", fontSize: 11, fill: "hsl(215, 15%, 55%)" }} />
               <Tooltip contentStyle={{ background: "hsl(220, 18%, 14%)", border: "1px solid hsl(220, 14%, 22%)", borderRadius: 8, fontSize: 12 }} />
-              <Area type="monotone" dataKey="grid" stroke="hsl(260, 60%, 55%)" fill="url(#gridGrad)" strokeWidth={2} name="Grid" />
-              <Area type="monotone" dataKey="solar" stroke="hsl(48, 96%, 53%)" fill="url(#solarGrad)" strokeWidth={2} name="Solar" />
-              <Area type="monotone" dataKey="diesel" stroke="hsl(25, 95%, 53%)" fill="hsl(25, 95%, 53%, 0.1)" strokeWidth={2} name="Diesel" />
+              <Area type="monotone" dataKey="actual" stroke="hsl(210, 100%, 50%)" fill="url(#actualGrad)" strokeWidth={2} name="Actual" />
+              <Line type="monotone" dataKey="target" stroke="hsl(145, 65%, 42%)" strokeWidth={2} strokeDasharray="6 3" dot={false} name="Target" />
               <Legend />
             </AreaChart>
           </ResponsiveContainer>
