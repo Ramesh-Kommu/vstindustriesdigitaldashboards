@@ -54,11 +54,10 @@ export const kpiData = {
 
 const hours = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
 
-export const energyTrendData: EnergyData[] = hours.map((time) => {
-  const grid = 280 + Math.random() * 120;
-  const solar = time >= "06:00" && time <= "18:00" ? 80 + Math.random() * 180 : Math.random() * 10;
-  const diesel = Math.random() > 0.85 ? 40 + Math.random() * 80 : 0;
-  return { time, grid: +grid.toFixed(1), solar: +solar.toFixed(1), diesel: +diesel.toFixed(1), total: +(grid + solar + diesel).toFixed(1) };
+export const energyTrendData: EnergyData[] = hours.map((time, i) => {
+  const target = 350;
+  const actual = 300 + Math.random() * 120 + (i >= 8 && i <= 18 ? 40 : 0);
+  return { time, actual: +actual.toFixed(1), target };
 });
 
 export const lineEnergyData = [
