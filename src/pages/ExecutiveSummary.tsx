@@ -1,7 +1,7 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import KpiCard from "@/components/KpiCard";
 import { kpiData, energyTrendData } from "@/data/mockData";
-import { Zap, Sun, Fuel, DollarSign, Package, Gauge, Droplets, Wind, AlertTriangle } from "lucide-react";
+import { Zap, DollarSign, Package, Gauge, Droplets, Wind, AlertTriangle } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
 import { motion } from "framer-motion";
 
@@ -9,12 +9,9 @@ const ExecutiveSummary = () => {
   return (
     <DashboardLayout title="Executive Summary">
       {/* KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        <KpiCard title="Total Energy" value={kpiData.totalEnergy} unit="kWh" icon={Zap} accentColor="primary" trend={{ value: 3.2, label: "vs yesterday" }} />
-        <KpiCard title="Grid Electricity" value={kpiData.gridElectricity} unit="kWh" icon={Zap} accentColor="grid" />
-        <KpiCard title="Solar Energy" value={kpiData.solarEnergy} unit="kWh" icon={Sun} accentColor="solar" trend={{ value: 12.5, label: "vs yesterday" }} />
-        <KpiCard title="Diesel Generator" value={kpiData.dieselGenerator} unit="kWh" icon={Fuel} accentColor="diesel" trend={{ value: -8.1, label: "vs yesterday" }} />
-        <KpiCard title="Energy Cost" value={`₹${kpiData.energyCost.toLocaleString()}`} icon={DollarSign} accentColor="warning" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <KpiCard title="Total Energy Consumption" value={kpiData.totalEnergy} unit="kWh" icon={Zap} accentColor="primary" trend={{ value: 3.2, label: "vs yesterday" }} />
+        <KpiCard title="Total Energy Cost" value={`₹${kpiData.energyCost.toLocaleString()}`} icon={DollarSign} accentColor="warning" trend={{ value: 2.8, label: "vs yesterday" }} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard title="Production Output" value={kpiData.productionOutput} unit="units" icon={Package} accentColor="success" trend={{ value: 5.4, label: "vs yesterday" }} />
