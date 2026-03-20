@@ -33,12 +33,11 @@ const EnergyMonitoring = () => {
               <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={energyTrendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
-                  <XAxis dataKey="time" stroke={axisStroke} tick={{ fontSize: 11 }} />
-                  <YAxis stroke={axisStroke} tick={{ fontSize: 11 }} />
+                  <XAxis dataKey="time" stroke={axisStroke} tick={{ fontSize: 11 }} label={{ value: "Date-Time", position: "insideBottom", offset: -2, fontSize: 11, fill: axisStroke }} />
+                  <YAxis stroke={axisStroke} tick={{ fontSize: 11 }} label={{ value: "KW", angle: -90, position: "insideLeft", fontSize: 11, fill: axisStroke }} />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Line type="monotone" dataKey="total" stroke="hsl(210, 100%, 50%)" strokeWidth={2} dot={false} name="Total" />
-                  <Line type="monotone" dataKey="grid" stroke="hsl(260, 60%, 55%)" strokeWidth={1.5} dot={false} name="Grid" />
-                  <Line type="monotone" dataKey="solar" stroke="hsl(48, 96%, 53%)" strokeWidth={1.5} dot={false} name="Solar" />
+                  <Line type="monotone" dataKey="actual" stroke="hsl(210, 100%, 50%)" strokeWidth={2} dot={false} name="Actual" />
+                  <Line type="monotone" dataKey="target" stroke="hsl(145, 65%, 42%)" strokeWidth={2} strokeDasharray="6 3" dot={false} name="Target" />
                   <Legend />
                 </LineChart>
               </ResponsiveContainer>
