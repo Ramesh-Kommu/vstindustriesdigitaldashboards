@@ -25,7 +25,7 @@ const ExecutiveSummary = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="chart-container lg:col-span-2">
           <h3 className="text-sm font-semibold mb-4">Energy Consumption Trend (24h)</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={energyTrendData}>
+            <ComposedChart data={energyTrendData}>
               <defs>
                 <linearGradient id="actualGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(210, 100%, 50%)" stopOpacity={0.3} />
@@ -39,7 +39,7 @@ const ExecutiveSummary = () => {
               <Area type="monotone" dataKey="actual" stroke="hsl(210, 100%, 50%)" fill="url(#actualGrad)" strokeWidth={2} name="Actual" />
               <Line type="monotone" dataKey="target" stroke="hsl(145, 65%, 42%)" strokeWidth={2} strokeDasharray="6 3" dot={false} name="Target" />
               <Legend />
-            </AreaChart>
+            </ComposedChart>
           </ResponsiveContainer>
         </motion.div>
 
