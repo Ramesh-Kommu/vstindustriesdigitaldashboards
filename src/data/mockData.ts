@@ -116,13 +116,13 @@ export const alertsData: Alert[] = [
 ];
 
 export const weeklyEnergyData = [
-  { day: "Mon", grid: 7200, solar: 3100, diesel: 800 },
-  { day: "Tue", grid: 7500, solar: 3400, diesel: 600 },
-  { day: "Wed", grid: 7890, solar: 3240, diesel: 1350 },
-  { day: "Thu", grid: 7100, solar: 2900, diesel: 900 },
-  { day: "Fri", grid: 7650, solar: 3300, diesel: 700 },
-  { day: "Sat", grid: 4200, solar: 2800, diesel: 200 },
-  { day: "Sun", grid: 3100, solar: 2500, diesel: 100 },
+  { day: "Mon", actual: 11100, target: 10500 },
+  { day: "Tue", actual: 11500, target: 10500 },
+  { day: "Wed", actual: 12480, target: 10500 },
+  { day: "Thu", actual: 10900, target: 10500 },
+  { day: "Fri", actual: 11650, target: 10500 },
+  { day: "Sat", actual: 7200, target: 7000 },
+  { day: "Sun", actual: 5700, target: 5500 },
 ];
 
 export const monthlyEnergyData = [
