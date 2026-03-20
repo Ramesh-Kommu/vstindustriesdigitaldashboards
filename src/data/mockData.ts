@@ -69,12 +69,12 @@ export const lineEnergyData = [
 ];
 
 export const equipmentEnergyData = [
-  { equipment: "Compressor A", line: "Line 1", consumption: 890, status: "Running" },
-  { equipment: "Dryer B", line: "Line 1", consumption: 650, status: "Running" },
-  { equipment: "Motor C", line: "Line 2", consumption: 1120, status: "Running" },
-  { equipment: "Furnace D", line: "Line 3", consumption: 1540, status: "Idle" },
-  { equipment: "Pump E", line: "Line 4", consumption: 320, status: "Running" },
-  { equipment: "Conveyor F", line: "Line 5", consumption: 210, status: "Maintenance" },
+  { equipment: "Compressor A", line: "Line 1", consumption: 890, cost: 7120, status: "Running" },
+  { equipment: "Dryer B", line: "Line 1", consumption: 650, cost: 5200, status: "Running" },
+  { equipment: "Motor C", line: "Line 2", consumption: 1120, cost: 8960, status: "Running" },
+  { equipment: "Furnace D", line: "Line 3", consumption: 1540, cost: 12320, status: "Idle" },
+  { equipment: "Pump E", line: "Line 4", consumption: 320, cost: 2560, status: "Running" },
+  { equipment: "Conveyor F", line: "Line 5", consumption: 210, cost: 1680, status: "Maintenance" },
 ];
 
 export const processData: ProcessData[] = Array.from({ length: 50 }, (_, i) => ({
