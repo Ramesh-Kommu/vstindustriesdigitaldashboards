@@ -36,7 +36,7 @@ const ExecutiveSummary = () => {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="chart-container lg:col-span-2">
-          <h3 className="text-sm font-semibold mb-4">Energy Consumption Trend (24h)</h3>
+          <h3 className="text-sm font-semibold mb-4">{chartTitle}</h3>
           <ResponsiveContainer width="100%" height={300}>
             <ComposedChart data={energyTrendData}>
               <defs>
