@@ -2,6 +2,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Bell } from "lucide-react";
 import { Link } from "react-router-dom";
+import UserProfileDropdown from "@/components/UserProfileDropdown";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -26,6 +27,7 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
                 <Bell className="h-4 w-4 text-muted-foreground" />
                 <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-critical text-[10px] flex items-center justify-center text-critical-foreground font-bold">2</span>
               </Link>
+              <UserProfileDropdown />
             </div>
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6 space-y-6">

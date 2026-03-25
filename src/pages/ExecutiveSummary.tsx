@@ -1,13 +1,26 @@
+import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import KpiCard from "@/components/KpiCard";
+import DashboardDateFilter, { type FilterMode } from "@/components/DashboardDateFilter";
 import { kpiData, energyTrendData } from "@/data/mockData";
 import { Zap, DollarSign, Package, Gauge, Droplets, Wind, AlertTriangle } from "lucide-react";
 import { ComposedChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, Legend } from "recharts";
 import { motion } from "framer-motion";
 
 const ExecutiveSummary = () => {
+  const [filterMode, setFilterMode] = useState<FilterMode>("day");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  const chartTitle = filterMode === "day" ? "Energy Consumption Trend (24h)" : filterMode === "week" ? "Energy Consumption Trend (Weekly)" : "Energy Consumption Trend (Monthly)";
+
   return (
     <DashboardLayout title="Executive Summary">
+      {/* Filter Bar */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h2 className="text-sm font-medium text-muted-foreground">Dashboard Overview</h2>
+        <DashboardDateFilter mode={filterMode} onModeChange={setFilterMode} selectedDate={selectedDate} onDateChange={setSelectedDate} />
+      </div>
+
       {/* KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <KpiCard title="Total Energy Consumption" value={kpiData.totalEnergy} unit="kWh" icon={Zap} accentColor="primary" trend={{ value: 3.2, label: "vs yesterday" }} />
@@ -23,7 +36,7 @@ const ExecutiveSummary = () => {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="chart-container lg:col-span-2">
-          <h3 className="text-sm font-semibold mb-4">Energy Consumption Trend (24h)</h3>
+          <h3 className="text-sm font-semibold mb-4">{chartTitle}</h3>
           <ResponsiveContainer width="100%" height={300}>
             <ComposedChart data={energyTrendData}>
               <defs>
