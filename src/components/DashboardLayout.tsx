@@ -2,6 +2,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Bell } from "lucide-react";
 import { Link } from "react-router-dom";
+import UserProfileDropdown from "@/components/UserProfileDropdown";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
