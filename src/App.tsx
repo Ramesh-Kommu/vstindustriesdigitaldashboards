@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import LoginPage from "./pages/LoginPage";
 import ExecutiveSummary from "./pages/ExecutiveSummary";
 import EnergyMonitoring from "./pages/EnergyMonitoring";
 import ProcessAnalysis from "./pages/ProcessAnalysis";
@@ -20,6 +21,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<ExecutiveSummary />} />
           <Route path="/energy" element={<EnergyMonitoring />} />
           <Route path="/process" element={<ProcessAnalysis />} />
