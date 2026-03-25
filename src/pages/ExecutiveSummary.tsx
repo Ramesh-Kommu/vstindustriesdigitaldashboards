@@ -1,11 +1,18 @@
+import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import KpiCard from "@/components/KpiCard";
+import DashboardDateFilter, { type FilterMode } from "@/components/DashboardDateFilter";
 import { kpiData, energyTrendData } from "@/data/mockData";
 import { Zap, DollarSign, Package, Gauge, Droplets, Wind, AlertTriangle } from "lucide-react";
 import { ComposedChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, Legend } from "recharts";
 import { motion } from "framer-motion";
 
 const ExecutiveSummary = () => {
+  const [filterMode, setFilterMode] = useState<FilterMode>("day");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  const chartTitle = filterMode === "day" ? "Energy Consumption Trend (24h)" : filterMode === "week" ? "Energy Consumption Trend (Weekly)" : "Energy Consumption Trend (Monthly)";
+
   return (
     <DashboardLayout title="Executive Summary">
       {/* KPI Grid */}
