@@ -15,6 +15,12 @@ const ExecutiveSummary = () => {
 
   return (
     <DashboardLayout title="Executive Summary">
+      {/* Filter Bar */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h2 className="text-sm font-medium text-muted-foreground">Dashboard Overview</h2>
+        <DashboardDateFilter mode={filterMode} onModeChange={setFilterMode} selectedDate={selectedDate} onDateChange={setSelectedDate} />
+      </div>
+
       {/* KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <KpiCard title="Total Energy Consumption" value={kpiData.totalEnergy} unit="kWh" icon={Zap} accentColor="primary" trend={{ value: 3.2, label: "vs yesterday" }} />
