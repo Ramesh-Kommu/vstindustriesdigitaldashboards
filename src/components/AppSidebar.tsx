@@ -1,7 +1,7 @@
 import { LayoutDashboard, Zap, Activity, Bell, FileText, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
-import vstLogo from "@/assets/vst-logo.png";
+import vstLogo from "@/assets/vst-factory-logo.jfif";
 import {
   Sidebar,
   SidebarContent,
@@ -33,11 +33,10 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <img src={vstLogo} alt="VST Industry" className="h-8 w-8 rounded" />
+          <img src={vstLogo} alt="Digital Factory System" className="h-8 w-8 rounded" />
           {!collapsed && (
             <div>
-              <h2 className="text-sm font-bold text-sidebar-accent-foreground">VST Industry</h2>
-              <p className="text-[10px] text-sidebar-foreground uppercase tracking-widest">Digital Factory</p>
+              <h2 className="text-sm font-bold text-sidebar-accent-foreground">Digital Factory System</h2>
             </div>
           )}
         </div>
@@ -71,7 +70,7 @@ export function AppSidebar() {
       <SidebarFooter className="p-3 border-t border-sidebar-border">
         {!collapsed && (
           <div className="text-[10px] text-sidebar-foreground/50 text-center">
-            Industry 4.0 Platform v2.1
+            Digital Factory System v2.1
           </div>
         )}
       </SidebarFooter>

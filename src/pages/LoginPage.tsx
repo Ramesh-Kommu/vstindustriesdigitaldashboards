@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import vstLogo from "@/assets/vst-logo.jfif";
+import vstLogo from "@/assets/vst-factory-logo.jfif";
 import { motion } from "framer-motion";
 
 const LoginPage = () => {
