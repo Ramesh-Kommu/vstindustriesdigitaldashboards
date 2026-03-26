@@ -33,7 +33,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <img src={vstLogo} alt="Digital Factory System" className="h-10 w-10 rounded object-cover" />
+          <img src={vstLogo} alt="Digital Factory System" className="h-12 w-12 rounded-lg object-cover shadow-sm ring-1 ring-primary/20" />
           {!collapsed && (
             <div>
               <h2 className="text-sm font-bold text-sidebar-accent-foreground">Digital Factory System</h2>
