@@ -71,8 +71,8 @@ const LoginPage = () => {
       >
         <div className="bg-card border border-border rounded-2xl p-8 shadow-lg" style={{ boxShadow: "var(--shadow-glow)" }}>
           <div className="flex flex-col items-center mb-8">
-            <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-primary/30 shadow-md">
-              <img src={vstLogo} alt="VST Industries Logo" className="w-full h-full object-cover" />
+            <div className="w-28 h-28 rounded-full overflow-hidden mb-4 border-3 border-primary/40 shadow-lg ring-2 ring-primary/10">
+              <img src={vstLogo} alt="VST Industries Logo" className="w-full h-full object-cover scale-110" />
             </div>
             <h1 className="text-xl font-bold text-foreground tracking-tight">Digital Factory System</h1>
             <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
