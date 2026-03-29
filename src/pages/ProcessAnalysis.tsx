@@ -1,6 +1,7 @@
 import DashboardLayout from "@/components/DashboardLayout";
+import DashboardFilters from "@/components/DashboardFilters";
 import { processData, moistureByLine, humidityByLine } from "@/data/mockData";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { motion } from "framer-motion";
 import { Droplets, Wind } from "lucide-react";
 
@@ -16,6 +17,8 @@ const StatusBadge = ({ status }: { status: string }) => {
 const ProcessAnalysis = () => {
   return (
     <DashboardLayout title="Process Analysis">
+      <DashboardFilters />
+
       {/* Sensor Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="chart-container">
