@@ -1,4 +1,4 @@
-import { LayoutDashboard, Zap, Activity, Bell, FileText, Settings } from "lucide-react";
+import { LayoutDashboard, Zap, Activity, Bell, FileText } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import vstLogo from "@/assets/vst-factory-logo.jfif";
