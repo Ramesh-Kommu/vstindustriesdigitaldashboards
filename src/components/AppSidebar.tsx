@@ -21,7 +21,6 @@ const navItems = [
   { title: "Process Analysis", url: "/process", icon: Activity },
   { title: "Alerts", url: "/alerts", icon: Bell },
   { title: "Reports", url: "/reports", icon: FileText },
-  { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
