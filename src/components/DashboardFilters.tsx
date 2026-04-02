@@ -1,6 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const units = ["Unit 1", "Unit 2", "Unit 3"];
+const units = ["Unit 1", "Unit 2", "Unit 3", "PMD", "SMD"];
 const lines = ["Line 1", "Line 2", "Line 3", "Line 4", "Line 5"];
 const machines = ["Compressor A", "Dryer B", "Motor C", "Furnace D", "Pump E", "Conveyor F"];
 const parameters = ["Energy", "Moisture", "Humidity", "Temperature"];
