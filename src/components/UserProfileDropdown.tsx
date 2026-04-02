@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, Settings, LogOut } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -47,12 +47,6 @@ const UserProfileDropdown = () => {
           <Link to="/settings" className="flex items-center gap-2 cursor-pointer">
             <User className="h-4 w-4" />
             Profile
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/settings" className="flex items-center gap-2 cursor-pointer">
-            <Settings className="h-4 w-4" />
-            Settings
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

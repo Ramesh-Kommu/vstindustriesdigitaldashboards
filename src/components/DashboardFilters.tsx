@@ -1,6 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const units = ["Unit 1", "Unit 2", "Unit 3"];
+const units = ["Unit 1", "Unit 2", "Unit 3", "PMD", "SMD"];
 const lines = ["Line 1", "Line 2", "Line 3", "Line 4", "Line 5"];
 const machines = ["Compressor A", "Dryer B", "Motor C", "Furnace D", "Pump E", "Conveyor F"];
 const parameters = ["Energy", "Moisture", "Humidity", "Temperature"];
@@ -12,12 +12,15 @@ interface FilterConfig {
   options: string[];
 }
 
+const shifts = ["Shift A", "Shift B", "Shift C"];
+
 const filters: FilterConfig[] = [
   { label: "Unit Name", placeholder: "Select…", options: units },
   { label: "Line Name", placeholder: "Select…", options: lines },
   { label: "Machine Name", placeholder: "Select…", options: machines },
   { label: "Parameter Name", placeholder: "Select…", options: parameters },
   { label: "SKU / Blend", placeholder: "Select…", options: skus },
+  { label: "Shift", placeholder: "Select…", options: shifts },
 ];
 
 const DashboardFilters = () => {
