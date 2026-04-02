@@ -12,12 +12,15 @@ interface FilterConfig {
   options: string[];
 }
 
+const shifts = ["Shift A", "Shift B", "Shift C"];
+
 const filters: FilterConfig[] = [
   { label: "Unit Name", placeholder: "Select…", options: units },
   { label: "Line Name", placeholder: "Select…", options: lines },
   { label: "Machine Name", placeholder: "Select…", options: machines },
   { label: "Parameter Name", placeholder: "Select…", options: parameters },
   { label: "SKU / Blend", placeholder: "Select…", options: skus },
+  { label: "Shift", placeholder: "Select…", options: shifts },
 ];
 
 const DashboardFilters = () => {
