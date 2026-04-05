@@ -1,16 +1,30 @@
+import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import DashboardFilters from "@/components/DashboardFilters";
-import { energyTrendData, lineEnergyData, equipmentEnergyData, weeklyEnergyData, monthlyEnergyData } from "@/data/mockData";
+import EnergyFilters from "@/components/EnergyFilters";
+import { energyTrendData, equipmentEnergyData } from "@/data/mockData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
 import { motion } from "framer-motion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const tooltipStyle = { background: "hsl(220, 18%, 14%)", border: "1px solid hsl(220, 14%, 22%)", borderRadius: 8, fontSize: 12 };
 const gridStroke = "hsl(220, 14%, 22%)";
 const axisStroke = "hsl(215, 15%, 55%)";
 
+type TimePeriod = "hour" | "today" | "yesterday" | "thisWeek" | "prevWeek" | "month" | "custom";
+type ChartMode = "consumption" | "cost";
+
 const EnergyMonitoring = () => {
-  // Horizontal bar chart data sorted highest to lowest
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>("today");
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [chartMode, setChartMode] = useState<ChartMode>("consumption");
+
   const assetBarData = [...equipmentEnergyData]
     .sort((a, b) => b.consumption - a.consumption)
     .map((eq) => ({
@@ -19,131 +33,111 @@ const EnergyMonitoring = () => {
       cost: eq.cost,
     }));
 
+  const periodLabel: Record<TimePeriod, string> = {
+    hour: "Last 1 Hour",
+    today: "Today",
+    yesterday: "Yesterday",
+    thisWeek: "This Week",
+    prevWeek: "Previous Week",
+    month: "This Month",
+    custom: "Custom",
+  };
+
   return (
     <DashboardLayout title="Energy Monitoring & Efficiency">
-      <DashboardFilters />
+      <EnergyFilters />
 
-      <Tabs defaultValue="realtime" className="space-y-4">
-        <TabsList className="bg-muted">
-          <TabsTrigger value="realtime">Real-Time</TabsTrigger>
-          <TabsTrigger value="comparison">Line Comparison</TabsTrigger>
-          <TabsTrigger value="trends">Trends</TabsTrigger>
-        </TabsList>
+      {/* Time Period Selector */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <label className="text-xs font-medium text-muted-foreground">Period:</label>
+        <Select value={timePeriod} onValueChange={(v) => setTimePeriod(v as TimePeriod)}>
+          <SelectTrigger className="w-[160px] h-9 bg-card border-border text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(periodLabel).map(([k, v]) => (
+              <SelectItem key={k} value={k}>{v}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {timePeriod === "custom" && (
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className={cn("h-9 justify-start text-left font-normal text-sm gap-2 min-w-[160px]")}>
+                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                {format(selectedDate, "dd MMM yyyy")}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar mode="single" selected={selectedDate} onSelect={(d) => { if (d) { setSelectedDate(d); setCalendarOpen(false); } }} initialFocus className="p-3 pointer-events-auto" />
+            </PopoverContent>
+          </Popover>
+        )}
+      </div>
 
-        <TabsContent value="realtime" className="space-y-4">
-          {/* Real-Time Trend */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="chart-container">
-            <h3 className="text-sm font-semibold mb-4">Real-Time Energy Consumption (kWh)</h3>
-            <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={energyTrendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
-                <XAxis dataKey="time" stroke={axisStroke} tick={{ fontSize: 11 }} label={{ value: "Date-Time", position: "insideBottom", offset: -2, fontSize: 11, fill: axisStroke }} />
-                <YAxis stroke={axisStroke} tick={{ fontSize: 11 }} label={{ value: "KW", angle: -90, position: "insideLeft", fontSize: 11, fill: axisStroke }} />
-                <Tooltip contentStyle={tooltipStyle} />
-                <Line type="monotone" dataKey="actual" stroke="hsl(210, 100%, 50%)" strokeWidth={2} dot={false} name="Actual" />
-                <Line type="monotone" dataKey="target" stroke="hsl(145, 65%, 42%)" strokeWidth={2} strokeDasharray="6 3" dot={false} name="Target" />
-                <Legend />
-              </LineChart>
-            </ResponsiveContainer>
-          </motion.div>
+      {/* Energy Control Chart */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="chart-container">
+        <h3 className="text-sm font-semibold mb-4">Energy Consumption (kWh) – {periodLabel[timePeriod]}</h3>
+        <ResponsiveContainer width="100%" height={320}>
+          <LineChart data={energyTrendData}>
+            <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+            <XAxis dataKey="time" stroke={axisStroke} tick={{ fontSize: 11 }} label={{ value: "Date-Time", position: "insideBottom", offset: -2, fontSize: 11, fill: axisStroke }} />
+            <YAxis stroke={axisStroke} tick={{ fontSize: 11 }} label={{ value: "KW", angle: -90, position: "insideLeft", fontSize: 11, fill: axisStroke }} />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Line type="monotone" dataKey="actual" stroke="hsl(210, 100%, 50%)" strokeWidth={2} dot={false} name="Actual" />
+            <Legend />
+          </LineChart>
+        </ResponsiveContainer>
+      </motion.div>
 
-          {/* Asset-wise Horizontal Bar Chart */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="chart-container">
-            <h3 className="text-sm font-semibold mb-4">Asset-wise Energy Consumption & Cost</h3>
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={assetBarData} layout="vertical" margin={{ left: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} horizontal={false} />
-                <XAxis type="number" stroke={axisStroke} tick={{ fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" stroke={axisStroke} tick={{ fontSize: 11 }} width={100} />
-                <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name: string) => [name === "consumption" ? `${value} kWh` : `₹${value.toLocaleString()}`, name === "consumption" ? "Consumption" : "Cost"]} />
-                <Bar dataKey="consumption" fill="hsl(210, 100%, 50%)" radius={[0, 4, 4, 0]} name="Consumption (kWh)" />
-                <Bar dataKey="cost" fill="hsl(145, 65%, 42%)" radius={[0, 4, 4, 0]} name="Cost (₹)" />
-                <Legend />
-              </BarChart>
-            </ResponsiveContainer>
-          </motion.div>
-
-          {/* Equipment Table */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="chart-container">
-            <h3 className="text-sm font-semibold mb-4">Equipment Energy Consumption</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-muted-foreground">
-                    <th className="text-left py-2 px-3">Equipment</th>
-                    <th className="text-left py-2 px-3">Line</th>
-                    <th className="text-right py-2 px-3">Consumption (kWh)</th>
-                    <th className="text-right py-2 px-3">Cost (₹)</th>
-                    <th className="text-left py-2 px-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {equipmentEnergyData.map((eq) => (
-                    <tr key={eq.equipment} className="border-b border-border/50 hover:bg-muted/30">
-                      <td className="py-2 px-3 font-medium">{eq.equipment}</td>
-                      <td className="py-2 px-3 text-muted-foreground">{eq.line}</td>
-                      <td className="py-2 px-3 text-right mono">{eq.consumption}</td>
-                      <td className="py-2 px-3 text-right mono">₹{eq.cost.toLocaleString()}</td>
-                      <td className="py-2 px-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full border ${eq.status === "Running" ? "status-normal" : eq.status === "Idle" ? "status-warning" : "status-critical"}`}>
-                          {eq.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
-        </TabsContent>
-
-        <TabsContent value="comparison" className="space-y-4">
-          {/* Only energy consumption chart, efficiency removed */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="chart-container">
-            <h3 className="text-sm font-semibold mb-4">Line-wise Energy Consumption (kWh)</h3>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={lineEnergyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
-                <XAxis dataKey="line" stroke={axisStroke} tick={{ fontSize: 11 }} />
-                <YAxis stroke={axisStroke} tick={{ fontSize: 11 }} />
-                <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="consumption" fill="hsl(210, 100%, 50%)" radius={[4, 4, 0, 0]} name="Consumption (kWh)" />
-              </BarChart>
-            </ResponsiveContainer>
-          </motion.div>
-        </TabsContent>
-
-        <TabsContent value="trends" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="chart-container">
-              <h3 className="text-sm font-semibold mb-4">Weekly Energy Consumption</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={weeklyEnergyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
-                  <XAxis dataKey="day" stroke={axisStroke} tick={{ fontSize: 11 }} />
-                  <YAxis stroke={axisStroke} tick={{ fontSize: 11 }} />
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="actual" fill="hsl(210, 100%, 50%)" radius={[4, 4, 0, 0]} name="Actual (kWh)" />
-                  <Bar dataKey="target" fill="hsl(145, 65%, 42%)" radius={[4, 4, 0, 0]} name="Target (kWh)" />
-                  <Legend />
-                </BarChart>
-              </ResponsiveContainer>
-            </motion.div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="chart-container">
-              <h3 className="text-sm font-semibold mb-4">Monthly Energy Trend</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={monthlyEnergyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
-                  <XAxis dataKey="month" stroke={axisStroke} tick={{ fontSize: 11 }} />
-                  <YAxis stroke={axisStroke} tick={{ fontSize: 11 }} />
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Line type="monotone" dataKey="total" stroke="hsl(210, 100%, 50%)" strokeWidth={2} dot={{ fill: "hsl(210, 100%, 50%)" }} name="Total kWh" />
-                </LineChart>
-              </ResponsiveContainer>
-            </motion.div>
+      {/* Consolidated Asset Chart with Toggle */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="chart-container">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold">
+            Asset-wise Energy {chartMode === "consumption" ? "Consumption (kWh)" : "Cost (₹)"}
+          </h3>
+          <div className="flex items-center gap-1 bg-muted rounded-md p-0.5">
+            <button
+              onClick={() => setChartMode("consumption")}
+              className={cn(
+                "px-3 py-1 text-xs font-medium rounded transition-colors",
+                chartMode === "consumption" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Consumption (kWh)
+            </button>
+            <button
+              onClick={() => setChartMode("cost")}
+              className={cn(
+                "px-3 py-1 text-xs font-medium rounded transition-colors",
+                chartMode === "cost" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Cost (₹)
+            </button>
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+        <ResponsiveContainer width="100%" height={320}>
+          <BarChart data={assetBarData} layout="vertical" margin={{ left: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} horizontal={false} />
+            <XAxis type="number" stroke={axisStroke} tick={{ fontSize: 11 }} />
+            <YAxis type="category" dataKey="name" stroke={axisStroke} tick={{ fontSize: 11 }} width={100} />
+            <Tooltip
+              contentStyle={tooltipStyle}
+              formatter={(value: number) => [
+                chartMode === "consumption" ? `${value} kWh` : `₹${value.toLocaleString()}`,
+                chartMode === "consumption" ? "Consumption" : "Cost",
+              ]}
+            />
+            <Bar
+              dataKey={chartMode}
+              fill={chartMode === "consumption" ? "hsl(210, 100%, 50%)" : "hsl(145, 65%, 42%)"}
+              radius={[0, 4, 4, 0]}
+              name={chartMode === "consumption" ? "Consumption (kWh)" : "Cost (₹)"}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </motion.div>
     </DashboardLayout>
   );
 };
