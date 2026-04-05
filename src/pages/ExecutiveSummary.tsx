@@ -3,7 +3,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import KpiCard from "@/components/KpiCard";
 import DashboardDateFilter, { type FilterMode } from "@/components/DashboardDateFilter";
 import { kpiData, energyTrendData, equipmentEnergyData } from "@/data/mockData";
-import { Zap, DollarSign, Package, Gauge, Droplets, Wind, AlertTriangle, Trophy, TrendingUp, TrendingDown } from "lucide-react";
+import { Zap, IndianRupee, Package, Gauge, Droplets, Wind, AlertTriangle, Trophy, TrendingUp, TrendingDown } from "lucide-react";
 import { ComposedChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar } from "recharts";
 import { motion } from "framer-motion";
 
