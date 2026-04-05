@@ -5,12 +5,13 @@ interface KpiCardProps {
   title: string;
   value: string | number;
   unit?: string;
+  subtitle?: string;
   icon: LucideIcon;
   trend?: { value: number; label: string };
   accentColor?: string;
 }
 
-const KpiCard = ({ title, value, unit, icon: Icon, trend, accentColor = "primary" }: KpiCardProps) => {
+const KpiCard = ({ title, value, unit, subtitle, icon: Icon, trend, accentColor = "primary" }: KpiCardProps) => {
   const colorMap: Record<string, string> = {
     primary: "text-primary",
     success: "text-success",
@@ -51,8 +52,9 @@ const KpiCard = ({ title, value, unit, icon: Icon, trend, accentColor = "primary
       </div>
       <div className="flex items-baseline gap-1.5">
         <span className="text-2xl font-bold mono">{typeof value === "number" ? value.toLocaleString() : value}</span>
-        {unit && <span className="text-sm text-muted-foreground">{unit}</span>}
+        {unit && <span className="text-xs text-muted-foreground">{unit}</span>}
       </div>
+      {subtitle && <p className="text-[10px] text-muted-foreground mt-0.5 italic">{subtitle}</p>}
       {trend && (
         <div className="mt-2 flex items-center gap-1">
           <span className={`text-xs font-medium ${trend.value >= 0 ? "text-success" : "text-critical"}`}>
