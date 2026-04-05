@@ -3,24 +3,40 @@ import DashboardLayout from "@/components/DashboardLayout";
 import KpiCard from "@/components/KpiCard";
 import DashboardDateFilter, { type FilterMode } from "@/components/DashboardDateFilter";
 import { kpiData, energyTrendData, equipmentEnergyData } from "@/data/mockData";
-import { Zap, DollarSign, Package, Gauge, Droplets, Wind, AlertTriangle, Trophy } from "lucide-react";
-import { ComposedChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, Legend, BarChart, Bar } from "recharts";
+import { Zap, DollarSign, Package, Gauge, Droplets, Wind, AlertTriangle, Trophy, TrendingUp, TrendingDown } from "lucide-react";
+import { ComposedChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar } from "recharts";
 import { motion } from "framer-motion";
 
 const tooltipStyle = { background: "hsl(220, 18%, 14%)", border: "1px solid hsl(220, 14%, 22%)", borderRadius: 8, fontSize: 12 };
 const gridStroke = "hsl(220, 14%, 22%)";
 const axisStroke = "hsl(215, 15%, 55%)";
 
+const totalConsumption = equipmentEnergyData.reduce((s, e) => s + e.consumption, 0);
+
 const top5Consumers = [...equipmentEnergyData]
   .sort((a, b) => b.consumption - a.consumption)
   .slice(0, 5)
-  .map((eq, i) => ({ rank: i + 1, name: eq.equipment, consumption: eq.consumption, line: eq.line }));
+  .map((eq, i) => ({
+    rank: i + 1,
+    name: eq.equipment,
+    consumption: eq.consumption,
+    line: eq.line,
+    contribution: +((eq.consumption / totalConsumption) * 100).toFixed(1),
+    trend: eq.consumption - eq.prevConsumption,
+    trendPct: +(((eq.consumption - eq.prevConsumption) / eq.prevConsumption) * 100).toFixed(1),
+  }));
+
+const secValue = +(kpiData.totalEnergy / kpiData.productionOutput).toFixed(2);
 
 const ExecutiveSummary = () => {
   const [filterMode, setFilterMode] = useState<FilterMode>("day");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
-  const chartTitle = filterMode === "day" ? "Energy Consumption Trend (24h)" : filterMode === "week" ? "Energy Consumption Trend (Weekly)" : "Energy Consumption Trend (Monthly)";
+  const chartTitle =
+    filterMode === "hour" ? "Energy Consumption Trend (Last 1 Hour)" :
+    filterMode === "day" ? "Energy Consumption Trend (Today)" :
+    filterMode === "week" ? "Energy Consumption Trend (Weekly)" :
+    "Energy Consumption Trend (Monthly)";
 
   return (
     <DashboardLayout title="Executive Summary">
@@ -31,9 +47,10 @@ const ExecutiveSummary = () => {
       </div>
 
       {/* KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <KpiCard title="Total Energy Consumption" value={kpiData.totalEnergy} unit="kWh" icon={Zap} accentColor="primary" trend={{ value: 3.2, label: "vs yesterday" }} />
         <KpiCard title="Total Energy Cost" value={`₹${kpiData.energyCost.toLocaleString()}`} icon={DollarSign} accentColor="warning" trend={{ value: 2.8, label: "vs yesterday" }} />
+        <KpiCard title="Specific Energy (SEC)" value={secValue} unit="kWh/unit" icon={Gauge} accentColor="info" trend={{ value: -1.5, label: "improving" }} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard title="Production Output" value={kpiData.productionOutput} unit="units" icon={Package} accentColor="success" trend={{ value: 5.4, label: "vs yesterday" }} />
@@ -54,12 +71,11 @@ const ExecutiveSummary = () => {
                   <stop offset="95%" stopColor="hsl(210, 100%, 50%)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 14%, 22%)" />
-              <XAxis dataKey="time" stroke="hsl(215, 15%, 55%)" tick={{ fontSize: 11 }} label={{ value: "Date-Time", position: "insideBottom", offset: -2, fontSize: 11, fill: "hsl(215, 15%, 55%)" }} />
-              <YAxis stroke="hsl(215, 15%, 55%)" tick={{ fontSize: 11 }} label={{ value: "KW", angle: -90, position: "insideLeft", fontSize: 11, fill: "hsl(215, 15%, 55%)" }} />
-              <Tooltip contentStyle={{ background: "hsl(220, 18%, 14%)", border: "1px solid hsl(220, 14%, 22%)", borderRadius: 8, fontSize: 12 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+              <XAxis dataKey="time" stroke={axisStroke} tick={{ fontSize: 11 }} label={{ value: "Date-Time", position: "insideBottom", offset: -2, fontSize: 11, fill: axisStroke }} />
+              <YAxis stroke={axisStroke} tick={{ fontSize: 11 }} label={{ value: "KW", angle: -90, position: "insideLeft", fontSize: 11, fill: axisStroke }} />
+              <Tooltip contentStyle={tooltipStyle} />
               <Area type="monotone" dataKey="actual" stroke="hsl(210, 100%, 50%)" fill="url(#actualGrad)" strokeWidth={2} name="Actual" />
-              <Line type="monotone" dataKey="target" stroke="hsl(145, 65%, 42%)" strokeWidth={2} strokeDasharray="6 3" dot={false} name="Target" />
               <Legend />
             </ComposedChart>
           </ResponsiveContainer>
@@ -88,19 +104,22 @@ const ExecutiveSummary = () => {
         </motion.div>
       </div>
 
-      {/* Top 5 Electricity Consumers */}
+      {/* Top 5 Electricity Consumers - Enhanced */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="chart-container">
         <div className="flex items-center gap-2 mb-4">
           <Trophy className="h-5 w-5 text-warning" />
           <h3 className="text-sm font-semibold">Top 5 Electricity Consumers</h3>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={250}>
             <BarChart data={top5Consumers} layout="vertical" margin={{ left: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} horizontal={false} />
               <XAxis type="number" stroke={axisStroke} tick={{ fontSize: 11 }} label={{ value: "kWh", position: "insideBottom", offset: -2, fontSize: 11, fill: axisStroke }} />
               <YAxis type="category" dataKey="name" stroke={axisStroke} tick={{ fontSize: 11 }} width={100} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value} kWh`, "Consumption"]} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name: string) => {
+                if (name === "Consumption (kWh)") return [`${value} kWh`, "Consumption"];
+                return [`${value}%`, "Contribution"];
+              }} />
               <Bar dataKey="consumption" fill="hsl(35, 92%, 50%)" radius={[0, 4, 4, 0]} name="Consumption (kWh)" />
             </BarChart>
           </ResponsiveContainer>
@@ -114,7 +133,20 @@ const ExecutiveSummary = () => {
                     <span className="text-xs text-muted-foreground ml-2">{item.line}</span>
                   </div>
                 </div>
-                <span className="mono text-sm font-bold">{item.consumption} kWh</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground">{item.contribution}%</span>
+                  <div className="flex items-center gap-1">
+                    {item.trend >= 0 ? (
+                      <TrendingUp className="h-3 w-3 text-critical" />
+                    ) : (
+                      <TrendingDown className="h-3 w-3 text-success" />
+                    )}
+                    <span className={`text-xs font-medium ${item.trend >= 0 ? "text-critical" : "text-success"}`}>
+                      {item.trendPct > 0 ? "+" : ""}{item.trendPct}%
+                    </span>
+                  </div>
+                  <span className="mono text-sm font-bold">{item.consumption} kWh</span>
+                </div>
               </div>
             ))}
           </div>

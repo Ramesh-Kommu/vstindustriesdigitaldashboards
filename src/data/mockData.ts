@@ -29,12 +29,22 @@ export interface ProcessData {
   time: string;
   moisture: number;
   humidity: number;
+  temperature: number;
   moistureTarget: number;
   moistureLSL: number;
   moistureUSL: number;
+  moistureLCL: number;
+  moistureUCL: number;
   humidityTarget: number;
   humidityLSL: number;
   humidityUSL: number;
+  humidityLCL: number;
+  humidityUCL: number;
+  temperatureTarget: number;
+  temperatureLSL: number;
+  temperatureUSL: number;
+  temperatureLCL: number;
+  temperatureUCL: number;
 }
 
 export const kpiData = {
@@ -69,25 +79,40 @@ export const lineEnergyData = [
 ];
 
 export const equipmentEnergyData = [
-  { equipment: "Compressor A", line: "Line 1", consumption: 890, cost: 7120, status: "Running" },
-  { equipment: "Dryer B", line: "Line 1", consumption: 650, cost: 5200, status: "Running" },
-  { equipment: "Motor C", line: "Line 2", consumption: 1120, cost: 8960, status: "Running" },
-  { equipment: "Furnace D", line: "Line 3", consumption: 1540, cost: 12320, status: "Idle" },
-  { equipment: "Pump E", line: "Line 4", consumption: 320, cost: 2560, status: "Running" },
-  { equipment: "Conveyor F", line: "Line 5", consumption: 210, cost: 1680, status: "Maintenance" },
+  { equipment: "Compressor A", line: "Line 1", consumption: 890, cost: 7120, status: "Running", prevConsumption: 820 },
+  { equipment: "Dryer B", line: "Line 1", consumption: 650, cost: 5200, status: "Running", prevConsumption: 680 },
+  { equipment: "Motor C", line: "Line 2", consumption: 1120, cost: 8960, status: "Running", prevConsumption: 1050 },
+  { equipment: "Furnace D", line: "Line 3", consumption: 1540, cost: 12320, status: "Idle", prevConsumption: 1480 },
+  { equipment: "Pump E", line: "Line 4", consumption: 320, cost: 2560, status: "Running", prevConsumption: 340 },
+  { equipment: "Conveyor F", line: "Line 5", consumption: 210, cost: 1680, status: "Maintenance", prevConsumption: 230 },
 ];
 
-export const processData: ProcessData[] = Array.from({ length: 50 }, (_, i) => ({
-  time: `Sample ${i + 1}`,
-  moisture: 11.5 + Math.random() * 2,
-  humidity: 55 + Math.random() * 8,
-  moistureTarget: 12.5,
-  moistureLSL: 11.0,
-  moistureUSL: 14.0,
-  humidityTarget: 58,
-  humidityLSL: 50,
-  humidityUSL: 65,
-}));
+export const processData: ProcessData[] = Array.from({ length: 50 }, (_, i) => {
+  const moisture = 11.5 + Math.random() * 2;
+  const humidity = 55 + Math.random() * 8;
+  const temperature = 28 + Math.random() * 6;
+  return {
+    time: `Sample ${i + 1}`,
+    moisture: +moisture.toFixed(2),
+    humidity: +humidity.toFixed(2),
+    temperature: +temperature.toFixed(2),
+    moistureTarget: 12.5,
+    moistureLSL: 11.0,
+    moistureUSL: 14.0,
+    moistureLCL: 11.5,
+    moistureUCL: 13.5,
+    humidityTarget: 58,
+    humidityLSL: 50,
+    humidityUSL: 65,
+    humidityLCL: 52,
+    humidityUCL: 63,
+    temperatureTarget: 31,
+    temperatureLSL: 27,
+    temperatureUSL: 35,
+    temperatureLCL: 28,
+    temperatureUCL: 34,
+  };
+});
 
 export const moistureByLine = [
   { line: "Line 1", current: 12.3, target: 12.5, status: "Normal" as const },
