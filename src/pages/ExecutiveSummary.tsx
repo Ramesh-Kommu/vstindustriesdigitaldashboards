@@ -47,10 +47,10 @@ const ExecutiveSummary = () => {
       </div>
 
       {/* KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <KpiCard title="Total Energy Consumption" value={kpiData.totalEnergy} unit="kWh" icon={Zap} accentColor="primary" trend={{ value: 3.2, label: "vs yesterday" }} />
-        <KpiCard title="Total Energy Cost" value={`₹${kpiData.energyCost.toLocaleString()}`} icon={DollarSign} accentColor="warning" trend={{ value: 2.8, label: "vs yesterday" }} />
-        <KpiCard title="Specific Energy (SEC)" value={secValue} unit="kWh/unit" icon={Gauge} accentColor="info" trend={{ value: -1.5, label: "improving" }} />
+        <KpiCard title="Total Energy Cost" value={`₹${kpiData.energyCost.toLocaleString()}`} icon={IndianRupee} accentColor="warning" trend={{ value: 2.8, label: "vs yesterday" }} />
+        <KpiCard title="Specific Energy Consumption (SEC)" value={secValue} unit="kWh / Million Sticks" subtitle="Total Energy Consumed ÷ Total Production Output" icon={Gauge} accentColor="info" trend={{ value: -1.5, label: "improving" }} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard title="Production Output" value={kpiData.productionOutput} unit="units" icon={Package} accentColor="success" trend={{ value: 5.4, label: "vs yesterday" }} />
