@@ -5,12 +5,13 @@ interface KpiCardProps {
   title: string;
   value: string | number;
   unit?: string;
+  subtitle?: string;
   icon: LucideIcon;
   trend?: { value: number; label: string };
   accentColor?: string;
 }
 
-const KpiCard = ({ title, value, unit, icon: Icon, trend, accentColor = "primary" }: KpiCardProps) => {
+const KpiCard = ({ title, value, unit, subtitle, icon: Icon, trend, accentColor = "primary" }: KpiCardProps) => {
   const colorMap: Record<string, string> = {
     primary: "text-primary",
     success: "text-success",
