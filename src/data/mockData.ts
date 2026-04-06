@@ -67,7 +67,8 @@ const hours = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")
 export const energyTrendData: EnergyData[] = hours.map((time, i) => {
   const target = 350;
   const actual = 300 + Math.random() * 120 + (i >= 8 && i <= 18 ? 40 : 0);
-  return { time, actual: +actual.toFixed(1), target };
+  const cost = +(actual * 7.5).toFixed(0);
+  return { time, actual: +actual.toFixed(1), target, cost };
 });
 
 export const lineEnergyData = [

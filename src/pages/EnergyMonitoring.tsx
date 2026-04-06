@@ -77,7 +77,31 @@ const EnergyMonitoring = () => {
 
       {/* Energy Control Chart */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="chart-container">
-        <h3 className="text-sm font-semibold mb-4">Energy Consumption (kWh) – {periodLabel[timePeriod]}</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold">
+            {chartMode === "consumption" ? "Energy Consumption (kWh)" : "Energy Cost (₹)"} – {periodLabel[timePeriod]}
+          </h3>
+          <div className="flex items-center gap-1 bg-muted rounded-md p-0.5">
+            <button
+              onClick={() => setChartMode("consumption")}
+              className={cn(
+                "px-3 py-1 text-xs font-medium rounded transition-colors",
+                chartMode === "consumption" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Consumption (kWh)
+            </button>
+            <button
+              onClick={() => setChartMode("cost")}
+              className={cn(
+                "px-3 py-1 text-xs font-medium rounded transition-colors",
+                chartMode === "cost" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Cost (₹)
+            </button>
+          </div>
+        </div>
         <ResponsiveContainer width="100%" height={320}>
           <LineChart data={energyTrendData}>
             <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
