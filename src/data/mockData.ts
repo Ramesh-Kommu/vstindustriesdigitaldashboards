@@ -27,6 +27,7 @@ export interface EnergyData {
 
 export interface ProcessData {
   time: string;
+  timestamp: string;
   moisture: number;
   humidity: number;
   temperature: number;
@@ -92,8 +93,11 @@ export const processData: ProcessData[] = Array.from({ length: 50 }, (_, i) => {
   const moisture = 11.5 + Math.random() * 2;
   const humidity = 55 + Math.random() * 8;
   const temperature = 28 + Math.random() * 6;
+  const baseDate = new Date(2026, 2, 10, 6, 0, 0);
+  const timestamp = new Date(baseDate.getTime() + i * 15 * 60 * 1000);
   return {
     time: `Sample ${i + 1}`,
+    timestamp: timestamp.toISOString(),
     moisture: +moisture.toFixed(2),
     humidity: +humidity.toFixed(2),
     temperature: +temperature.toFixed(2),
