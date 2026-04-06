@@ -73,7 +73,7 @@ const ExecutiveSummary = () => {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
               <XAxis dataKey="time" stroke={axisStroke} tick={{ fontSize: 11 }} label={{ value: "Date-Time", position: "insideBottom", offset: -2, fontSize: 11, fill: axisStroke }} />
-              <YAxis stroke={axisStroke} tick={{ fontSize: 11 }} label={{ value: "KW", angle: -90, position: "insideLeft", fontSize: 11, fill: axisStroke }} />
+              <YAxis stroke={axisStroke} tick={{ fontSize: 11 }} label={{ value: "kWh", angle: -90, position: "insideLeft", fontSize: 11, fill: axisStroke }} />
               <Tooltip contentStyle={tooltipStyle} />
               <Area type="monotone" dataKey="actual" stroke="hsl(210, 100%, 50%)" fill="url(#actualGrad)" strokeWidth={2} name="Actual" />
               <Legend />
