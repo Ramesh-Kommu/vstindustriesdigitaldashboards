@@ -1,49 +1,55 @@
 import { useState, useMemo } from "react";
+import { format } from "date-fns";
 import DashboardLayout from "@/components/DashboardLayout";
 import EnergyFilters from "@/components/EnergyFilters";
 import { energyTrendData, equipmentEnergyData } from "@/data/mockData";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, Legend, Brush, ReferenceArea,
+  LineChart, Line, Legend,
 } from "recharts";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
 
 const tooltipStyle = { background: "hsl(220, 18%, 14%)", border: "1px solid hsl(220, 14%, 22%)", borderRadius: 8, fontSize: 12 };
 const gridStroke = "hsl(220, 14%, 22%)";
 const axisStroke = "hsl(215, 15%, 55%)";
 
-type QuickRange = "hour" | "today" | "7days" | "month";
+type PeriodOption = "today" | "yesterday" | "7days" | "30days" | "month" | "custom";
 type ChartMode = "consumption" | "cost";
 
-const quickRangeLabel: Record<QuickRange, string> = {
-  hour: "Last 1 Hour",
+const periodLabels: Record<PeriodOption, string> = {
   today: "Today",
+  yesterday: "Yesterday",
   "7days": "Last 7 Days",
+  "30days": "Last 30 Days",
   month: "This Month",
-};
-
-const granularityLabel: Record<QuickRange, string> = {
-  hour: "1 Point = 5 Min",
-  today: "1 Point = 1 Hour",
-  "7days": "1 Point = 1 Day",
-  month: "1 Point = 1 Day",
+  custom: "Custom Range",
 };
 
 const EnergyMonitoring = () => {
-  const [quickRange, setQuickRange] = useState<QuickRange>("today");
+  const [period, setPeriod] = useState<PeriodOption>("today");
   const [chartMode, setChartMode] = useState<ChartMode>("consumption");
-  const [rangeSlider, setRangeSlider] = useState<number[]>([0, 100]);
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
 
-  // Derive visible data from range slider
+  // Filter data based on period (mock: just slice differently)
   const visibleData = useMemo(() => {
-    const start = Math.floor((rangeSlider[0] / 100) * energyTrendData.length);
-    const end = Math.ceil((rangeSlider[1] / 100) * energyTrendData.length);
-    return energyTrendData.slice(start, Math.max(end, start + 1));
-  }, [rangeSlider]);
+    switch (period) {
+      case "today": return energyTrendData.slice(0, 24);
+      case "yesterday": return energyTrendData.slice(0, 24);
+      case "7days": return energyTrendData.slice(0, 48);
+      case "30days": return energyTrendData;
+      case "month": return energyTrendData;
+      case "custom": return energyTrendData; // In real app, filter by dates
+      default: return energyTrendData;
+    }
+  }, [period, startDate, endDate]);
 
-  // KPI summary
   const kpiSummary = useMemo(() => {
     const key = chartMode === "consumption" ? "actual" : "cost";
     const values = visibleData.map((d) => (d as any)[key] as number);
@@ -95,30 +101,11 @@ const EnergyMonitoring = () => {
         </div>
 
         {/* KPI summary row */}
-        <div className="flex items-center gap-4 flex-wrap mb-2 text-xs">
+        <div className="flex items-center gap-4 flex-wrap mb-3 text-xs">
           <span className="text-muted-foreground">Min: <span className="text-foreground font-medium">{fmt(kpiSummary.min)}</span></span>
           <span className="text-muted-foreground">Max: <span className="text-foreground font-medium">{fmt(kpiSummary.max)}</span></span>
           <span className="text-muted-foreground">Total: <span className="text-foreground font-medium">{fmt(kpiSummary.total)}</span></span>
           <span className="text-muted-foreground">Average: <span className="text-foreground font-medium">{fmt(kpiSummary.avg)}</span></span>
-        </div>
-
-        {/* Quick range + granularity */}
-        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-          <div className="flex items-center gap-1">
-            {(Object.keys(quickRangeLabel) as QuickRange[]).map((k) => (
-              <button
-                key={k}
-                onClick={() => { setQuickRange(k); setRangeSlider([0, 100]); }}
-                className={cn(
-                  "px-2.5 py-1 text-[11px] font-medium rounded transition-colors",
-                  quickRange === k ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {quickRangeLabel[k]}
-              </button>
-            ))}
-          </div>
-          <span className="text-[11px] text-muted-foreground italic">{granularityLabel[quickRange]}</span>
         </div>
 
         {/* Main chart */}
@@ -158,21 +145,54 @@ const EnergyMonitoring = () => {
           </LineChart>
         </ResponsiveContainer>
 
-        {/* Range navigator slider */}
-        <div className="mt-3 px-2">
-          <label className="text-[10px] text-muted-foreground mb-1 block">Range Navigator</label>
-          <Slider
-            min={0}
-            max={100}
-            step={1}
-            value={rangeSlider}
-            onValueChange={setRangeSlider}
-            className="w-full"
-          />
-          <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
-            <span>{energyTrendData[0]?.time}</span>
-            <span>{energyTrendData[energyTrendData.length - 1]?.time}</span>
+        {/* Period selector at bottom */}
+        <div className="mt-4 pt-3 border-t border-border flex items-end justify-end gap-3 flex-wrap">
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] text-muted-foreground font-medium">Period</label>
+            <Select value={period} onValueChange={(v) => setPeriod(v as PeriodOption)}>
+              <SelectTrigger className="h-8 text-xs w-[160px] bg-card border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.keys(periodLabels) as PeriodOption[]).map((k) => (
+                  <SelectItem key={k} value={k}>{periodLabels[k]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          {period === "custom" && (
+            <>
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] text-muted-foreground font-medium">Start Date</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("h-8 text-xs w-[140px] justify-start", !startDate && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                      {startDate ? format(startDate, "dd MMM yyyy") : "Select"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] text-muted-foreground font-medium">End Date</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("h-8 text-xs w-[140px] justify-start", !endDate && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                      {endDate ? format(endDate, "dd MMM yyyy") : "Select"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </>
+          )}
         </div>
       </motion.div>
 
@@ -182,26 +202,6 @@ const EnergyMonitoring = () => {
           <h3 className="text-sm font-semibold">
             Asset-wise Energy {chartMode === "consumption" ? "Consumption (kWh)" : "Cost (₹)"}
           </h3>
-          <div className="flex items-center gap-1 bg-muted rounded-md p-0.5">
-            <button
-              onClick={() => setChartMode("consumption")}
-              className={cn(
-                "px-3 py-1 text-xs font-medium rounded transition-colors",
-                chartMode === "consumption" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Consumption (kWh)
-            </button>
-            <button
-              onClick={() => setChartMode("cost")}
-              className={cn(
-                "px-3 py-1 text-xs font-medium rounded transition-colors",
-                chartMode === "cost" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Cost (₹)
-            </button>
-          </div>
         </div>
         <ResponsiveContainer width="100%" height={320}>
           <BarChart data={assetBarData} layout="vertical" margin={{ left: 20 }}>
