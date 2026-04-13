@@ -643,47 +643,62 @@ const ReportsPage = () => {
 
         {/* === PRODUCTION REPORT === */}
         <TabsContent value="production" className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[
-              { label: "Production Output", value: `${kpiData.productionOutput.toLocaleString()} units`, icon: <FileText className="h-5 w-5 text-primary" />, bg: "bg-primary/10" },
-              { label: "Energy / Unit", value: `${kpiData.energyPerUnit} kWh`, icon: <Gauge className="h-5 w-5 text-info" />, bg: "bg-info/10" },
-              { label: "Avg Moisture", value: `${kpiData.avgMoisture} %`, icon: <Droplets className="h-5 w-5 text-success" />, bg: "bg-success/10" },
-              { label: "Avg Humidity", value: `${kpiData.avgHumidity} % RH`, icon: <Wind className="h-5 w-5 text-warning" />, bg: "bg-warning/10" },
-            ].map((c) => (
-              <div key={c.label} className="kpi-card flex items-center gap-3">
-                <div className={`p-2 rounded-md ${c.bg}`}>{c.icon}</div>
-                <div>
-                  <div className="text-lg font-bold mono">{c.value}</div>
-                  <div className="text-xs text-muted-foreground">{c.label}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="chart-container">
-            <h3 className="text-sm font-semibold mb-3">Production vs Energy Trend</h3>
-            <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={energyTrendData} margin={{ top: 5, right: 10, bottom: 5, left: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
-                <XAxis dataKey="time" stroke={axisStroke} tick={{ fontSize: 10 }} interval="preserveStartEnd" />
-                <YAxis stroke={axisStroke} tick={{ fontSize: 10 }} label={{ value: "kWh", angle: -90, position: "insideLeft", fontSize: 11, fill: axisStroke }} />
-                <ReTooltip contentStyle={tooltipStyle} />
-                <Line type="monotone" dataKey="actual" stroke="hsl(210, 100%, 50%)" strokeWidth={2} dot={false} name="Consumption (kWh)" />
-                <Line type="monotone" dataKey="target" stroke="hsl(145, 65%, 42%)" strokeDasharray="5 5" strokeWidth={1.5} dot={false} name="Target" />
-                <Legend />
-              </LineChart>
-            </ResponsiveContainer>
-            {periodSelector}
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="chart-container">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <h3 className="text-sm font-semibold">Production Data</h3>
-              <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={handleExportCSV}><Download className="h-3.5 w-3.5" />Export</Button>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input placeholder="Search…" value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }} className="h-8 text-xs pl-8 w-[180px] bg-card" />
+                </div>
+                <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={handleExportPDF} disabled={exporting}>
+                  {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}PDF
+                </Button>
+                <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={handleExportExcel} disabled={exporting}>
+                  {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}Excel
+                </Button>
+              </div>
             </div>
-            <div className="text-center py-12 text-muted-foreground text-sm">
-              Production report data will be populated from connected data sources.
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-muted-foreground">
+                    <th className="text-left py-2 px-3 text-xs">Timestamp</th>
+                    <th className="text-left py-2 px-3 text-xs">Unit</th>
+                    <th className="text-left py-2 px-3 text-xs">Line</th>
+                    <th className="text-left py-2 px-3 text-xs">Machine</th>
+                    <th className="text-right py-2 px-3 text-xs">Production</th>
+                    <th className="text-right py-2 px-3 text-xs">Consumption (kWh)</th>
+                    <th className="text-right py-2 px-3 text-xs">Energy/Unit</th>
+                    <th className="text-right py-2 px-3 text-xs">Moisture (%)</th>
+                    <th className="text-right py-2 px-3 text-xs">Humidity (% RH)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(pagedData as typeof productionTableData).map((d, i) => (
+                    <tr key={i} className="border-b border-border/50 hover:bg-muted/30">
+                      <td className="py-2.5 px-3 mono text-xs text-muted-foreground">{(d as any).timestamp}</td>
+                      <td className="py-2.5 px-3 text-xs">{(d as any).unit}</td>
+                      <td className="py-2.5 px-3 text-xs">{(d as any).line}</td>
+                      <td className="py-2.5 px-3 text-xs font-medium">{(d as any).machine}</td>
+                      <td className="py-2.5 px-3 text-xs mono text-right">{(d as any).production}</td>
+                      <td className="py-2.5 px-3 text-xs mono text-right">{(d as any).consumption?.toLocaleString()}</td>
+                      <td className="py-2.5 px-3 text-xs mono text-right">{(d as any).energyPerUnit}</td>
+                      <td className="py-2.5 px-3 text-xs mono text-right">{(d as any).moisture}</td>
+                      <td className="py-2.5 px-3 text-xs mono text-right">{(d as any).humidity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+              <span className="text-xs text-muted-foreground">Page {page} of {totalPages} ({currentTableData.length} records)</span>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-7 w-7" disabled={page <= 1} onClick={() => setPage(page - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" disabled={page >= totalPages} onClick={() => setPage(page + 1)}><ChevronRight className="h-4 w-4" /></Button>
+              </div>
+            </div>
+            {periodSelector}
           </motion.div>
         </TabsContent>
       </Tabs>
