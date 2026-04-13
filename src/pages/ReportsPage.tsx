@@ -150,27 +150,104 @@ const ReportsPage = () => {
     return data;
   }, [searchQuery]);
 
-  const currentTableData = reportType === "energy" ? energyTableData : reportType === "process" ? processTableData : alertsTableData;
+  // Production table data
+  const productionTableData = useMemo(() => {
+    let data = energyTrendData.map((d, i) => ({
+      timestamp: `2026-03-10 ${d.time}`,
+      unit: units[1 + (i % (units.length - 1))],
+      line: lines[1 + (i % (lines.length - 1))],
+      machine: machines[1 + (i % (machines.length - 1))],
+      production: Math.round(180 + Math.random() * 40),
+      consumption: d.actual,
+      energyPerUnit: +(d.actual / (180 + i * 0.5)).toFixed(2),
+      moisture: +(11 + Math.random() * 2.5).toFixed(1),
+      humidity: +(55 + Math.random() * 8).toFixed(1),
+    }));
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      data = data.filter((d) => d.machine.toLowerCase().includes(q) || d.line.toLowerCase().includes(q) || d.unit.toLowerCase().includes(q));
+    }
+    return data;
+  }, [searchQuery]);
+
+  const currentTableData = reportType === "energy" ? energyTableData : reportType === "process" ? processTableData : reportType === "production" ? productionTableData : alertsTableData;
   const totalPages = Math.max(1, Math.ceil(currentTableData.length / PAGE_SIZE));
   const pagedData = currentTableData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const handleExportCSV = useCallback(() => {
+  const [exporting, setExporting] = useState(false);
+
+  const getFileName = useCallback(() => {
+    const typeLabel = reportType.charAt(0).toUpperCase() + reportType.slice(1);
+    const unitPart = filterUnit !== "All" ? `_${filterUnit.replace(/\s/g, "")}` : "";
+    const linePart = filterLine !== "All" ? `_${filterLine.replace(/\s/g, "")}` : "";
+    const datePart = `_${format(new Date(), "yyyyMMdd")}`;
+    return `${typeLabel}Report${unitPart}${linePart}${datePart}`;
+  }, [reportType, filterUnit, filterLine]);
+
+  const buildCSVContent = useCallback(() => {
     let csv = "";
     if (reportType === "energy") {
       csv = ["Timestamp,Machine,Line,Consumption (kWh),Cost (₹),Status", ...energyTableData.map((d) => `${d.timestamp},${d.machine},${d.line},${d.consumption},${d.cost},${d.status}`)].join("\n");
     } else if (reportType === "process") {
       csv = ["Timestamp,Parameter,Value,LSL,USL,Status", ...processTableData.map((d) => `${d.timestamp},${d.parameter},${d.value},${d.lsl},${d.usl},${d.status}`)].join("\n");
+    } else if (reportType === "production") {
+      csv = ["Timestamp,Unit,Line,Machine,Production (units),Consumption (kWh),Energy/Unit,Moisture (%),Humidity (% RH)", ...productionTableData.map((d) => `${d.timestamp},${d.unit},${d.line},${d.machine},${d.production},${d.consumption},${d.energyPerUnit},${d.moisture},${d.humidity}`)].join("\n");
     } else {
       csv = ["ID,Timestamp,Equipment,Line,Parameter,Severity,Value,Threshold,Status", ...alertsTableData.map((d) => `${d.id},${d.timestamp},${d.equipment},${d.line},${d.parameter},${d.severity},${d.value},${d.threshold},${d.status}`)].join("\n");
     }
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${reportType}_report.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [reportType, energyTableData, processTableData, alertsTableData]);
+    return csv;
+  }, [reportType, energyTableData, processTableData, alertsTableData, productionTableData]);
+
+  const handleExportCSV = useCallback(() => {
+    setExporting(true);
+    setTimeout(() => {
+      const csv = buildCSVContent();
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${getFileName()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setExporting(false);
+      toast.success("Report downloaded successfully", { description: `${getFileName()}.csv` });
+    }, 600);
+  }, [buildCSVContent, getFileName]);
+
+  const handleExportExcel = useCallback(() => {
+    setExporting(true);
+    setTimeout(() => {
+      const csv = buildCSVContent();
+      const blob = new Blob([csv], { type: "application/vnd.ms-excel" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${getFileName()}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setExporting(false);
+      toast.success("Report downloaded successfully", { description: `${getFileName()}.xlsx` });
+    }, 600);
+  }, [buildCSVContent, getFileName]);
+
+  const handleExportPDF = useCallback(() => {
+    setExporting(true);
+    setTimeout(() => {
+      const csv = buildCSVContent();
+      const lines = csv.split("\n");
+      const header = lines[0];
+      const content = `${reportType.toUpperCase()} REPORT\n\nFilters: Unit=${filterUnit}, Line=${filterLine}, Machine=${filterMachine}, SKU=${filterSku}, Shift=${filterShift}, Period=${periodLabels[period]}\nGenerated: ${format(new Date(), "dd MMM yyyy HH:mm")}\n\n${header}\n${"─".repeat(80)}\n${lines.slice(1).join("\n")}`;
+      const blob = new Blob([content], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${getFileName()}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setExporting(false);
+      toast.success("Report downloaded successfully", { description: `${getFileName()}.pdf` });
+    }, 800);
+  }, [buildCSVContent, getFileName, reportType, filterUnit, filterLine, filterMachine, filterSku, filterShift, period]);
 
   const filterBar = (
     <div className="flex flex-wrap items-end gap-3">
