@@ -14,8 +14,9 @@ import {
 import {
   Zap, IndianRupee, Gauge, Droplets, Wind, AlertTriangle, CheckCircle,
   XCircle, Eye, Download, FileText, CalendarIcon, ExternalLink, Search,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, FileSpreadsheet, Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -149,27 +150,104 @@ const ReportsPage = () => {
     return data;
   }, [searchQuery]);
 
-  const currentTableData = reportType === "energy" ? energyTableData : reportType === "process" ? processTableData : alertsTableData;
+  // Production table data
+  const productionTableData = useMemo(() => {
+    let data = energyTrendData.map((d, i) => ({
+      timestamp: `2026-03-10 ${d.time}`,
+      unit: units[1 + (i % (units.length - 1))],
+      line: lines[1 + (i % (lines.length - 1))],
+      machine: machines[1 + (i % (machines.length - 1))],
+      production: Math.round(180 + Math.random() * 40),
+      consumption: d.actual,
+      energyPerUnit: +(d.actual / (180 + i * 0.5)).toFixed(2),
+      moisture: +(11 + Math.random() * 2.5).toFixed(1),
+      humidity: +(55 + Math.random() * 8).toFixed(1),
+    }));
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      data = data.filter((d) => d.machine.toLowerCase().includes(q) || d.line.toLowerCase().includes(q) || d.unit.toLowerCase().includes(q));
+    }
+    return data;
+  }, [searchQuery]);
+
+  const currentTableData = reportType === "energy" ? energyTableData : reportType === "process" ? processTableData : reportType === "production" ? productionTableData : alertsTableData;
   const totalPages = Math.max(1, Math.ceil(currentTableData.length / PAGE_SIZE));
   const pagedData = currentTableData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const handleExportCSV = useCallback(() => {
+  const [exporting, setExporting] = useState(false);
+
+  const getFileName = useCallback(() => {
+    const typeLabel = reportType.charAt(0).toUpperCase() + reportType.slice(1);
+    const unitPart = filterUnit !== "All" ? `_${filterUnit.replace(/\s/g, "")}` : "";
+    const linePart = filterLine !== "All" ? `_${filterLine.replace(/\s/g, "")}` : "";
+    const datePart = `_${format(new Date(), "yyyyMMdd")}`;
+    return `${typeLabel}Report${unitPart}${linePart}${datePart}`;
+  }, [reportType, filterUnit, filterLine]);
+
+  const buildCSVContent = useCallback(() => {
     let csv = "";
     if (reportType === "energy") {
       csv = ["Timestamp,Machine,Line,Consumption (kWh),Cost (₹),Status", ...energyTableData.map((d) => `${d.timestamp},${d.machine},${d.line},${d.consumption},${d.cost},${d.status}`)].join("\n");
     } else if (reportType === "process") {
       csv = ["Timestamp,Parameter,Value,LSL,USL,Status", ...processTableData.map((d) => `${d.timestamp},${d.parameter},${d.value},${d.lsl},${d.usl},${d.status}`)].join("\n");
+    } else if (reportType === "production") {
+      csv = ["Timestamp,Unit,Line,Machine,Production (units),Consumption (kWh),Energy/Unit,Moisture (%),Humidity (% RH)", ...productionTableData.map((d) => `${d.timestamp},${d.unit},${d.line},${d.machine},${d.production},${d.consumption},${d.energyPerUnit},${d.moisture},${d.humidity}`)].join("\n");
     } else {
       csv = ["ID,Timestamp,Equipment,Line,Parameter,Severity,Value,Threshold,Status", ...alertsTableData.map((d) => `${d.id},${d.timestamp},${d.equipment},${d.line},${d.parameter},${d.severity},${d.value},${d.threshold},${d.status}`)].join("\n");
     }
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${reportType}_report.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [reportType, energyTableData, processTableData, alertsTableData]);
+    return csv;
+  }, [reportType, energyTableData, processTableData, alertsTableData, productionTableData]);
+
+  const handleExportCSV = useCallback(() => {
+    setExporting(true);
+    setTimeout(() => {
+      const csv = buildCSVContent();
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${getFileName()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setExporting(false);
+      toast.success("Report downloaded successfully", { description: `${getFileName()}.csv` });
+    }, 600);
+  }, [buildCSVContent, getFileName]);
+
+  const handleExportExcel = useCallback(() => {
+    setExporting(true);
+    setTimeout(() => {
+      const csv = buildCSVContent();
+      const blob = new Blob([csv], { type: "application/vnd.ms-excel" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${getFileName()}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setExporting(false);
+      toast.success("Report downloaded successfully", { description: `${getFileName()}.xlsx` });
+    }, 600);
+  }, [buildCSVContent, getFileName]);
+
+  const handleExportPDF = useCallback(() => {
+    setExporting(true);
+    setTimeout(() => {
+      const csv = buildCSVContent();
+      const lines = csv.split("\n");
+      const header = lines[0];
+      const content = `${reportType.toUpperCase()} REPORT\n\nFilters: Unit=${filterUnit}, Line=${filterLine}, Machine=${filterMachine}, SKU=${filterSku}, Shift=${filterShift}, Period=${periodLabels[period]}\nGenerated: ${format(new Date(), "dd MMM yyyy HH:mm")}\n\n${header}\n${"─".repeat(80)}\n${lines.slice(1).join("\n")}`;
+      const blob = new Blob([content], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${getFileName()}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setExporting(false);
+      toast.success("Report downloaded successfully", { description: `${getFileName()}.pdf` });
+    }, 800);
+  }, [buildCSVContent, getFileName, reportType, filterUnit, filterLine, filterMachine, filterSku, filterShift, period]);
 
   const filterBar = (
     <div className="flex flex-wrap items-end gap-3">
@@ -565,47 +643,62 @@ const ReportsPage = () => {
 
         {/* === PRODUCTION REPORT === */}
         <TabsContent value="production" className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[
-              { label: "Production Output", value: `${kpiData.productionOutput.toLocaleString()} units`, icon: <FileText className="h-5 w-5 text-primary" />, bg: "bg-primary/10" },
-              { label: "Energy / Unit", value: `${kpiData.energyPerUnit} kWh`, icon: <Gauge className="h-5 w-5 text-info" />, bg: "bg-info/10" },
-              { label: "Avg Moisture", value: `${kpiData.avgMoisture} %`, icon: <Droplets className="h-5 w-5 text-success" />, bg: "bg-success/10" },
-              { label: "Avg Humidity", value: `${kpiData.avgHumidity} % RH`, icon: <Wind className="h-5 w-5 text-warning" />, bg: "bg-warning/10" },
-            ].map((c) => (
-              <div key={c.label} className="kpi-card flex items-center gap-3">
-                <div className={`p-2 rounded-md ${c.bg}`}>{c.icon}</div>
-                <div>
-                  <div className="text-lg font-bold mono">{c.value}</div>
-                  <div className="text-xs text-muted-foreground">{c.label}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="chart-container">
-            <h3 className="text-sm font-semibold mb-3">Production vs Energy Trend</h3>
-            <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={energyTrendData} margin={{ top: 5, right: 10, bottom: 5, left: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
-                <XAxis dataKey="time" stroke={axisStroke} tick={{ fontSize: 10 }} interval="preserveStartEnd" />
-                <YAxis stroke={axisStroke} tick={{ fontSize: 10 }} label={{ value: "kWh", angle: -90, position: "insideLeft", fontSize: 11, fill: axisStroke }} />
-                <ReTooltip contentStyle={tooltipStyle} />
-                <Line type="monotone" dataKey="actual" stroke="hsl(210, 100%, 50%)" strokeWidth={2} dot={false} name="Consumption (kWh)" />
-                <Line type="monotone" dataKey="target" stroke="hsl(145, 65%, 42%)" strokeDasharray="5 5" strokeWidth={1.5} dot={false} name="Target" />
-                <Legend />
-              </LineChart>
-            </ResponsiveContainer>
-            {periodSelector}
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="chart-container">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
               <h3 className="text-sm font-semibold">Production Data</h3>
-              <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={handleExportCSV}><Download className="h-3.5 w-3.5" />Export</Button>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input placeholder="Search…" value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }} className="h-8 text-xs pl-8 w-[180px] bg-card" />
+                </div>
+                <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={handleExportPDF} disabled={exporting}>
+                  {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}PDF
+                </Button>
+                <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={handleExportExcel} disabled={exporting}>
+                  {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}Excel
+                </Button>
+              </div>
             </div>
-            <div className="text-center py-12 text-muted-foreground text-sm">
-              Production report data will be populated from connected data sources.
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-muted-foreground">
+                    <th className="text-left py-2 px-3 text-xs">Timestamp</th>
+                    <th className="text-left py-2 px-3 text-xs">Unit</th>
+                    <th className="text-left py-2 px-3 text-xs">Line</th>
+                    <th className="text-left py-2 px-3 text-xs">Machine</th>
+                    <th className="text-right py-2 px-3 text-xs">Production</th>
+                    <th className="text-right py-2 px-3 text-xs">Consumption (kWh)</th>
+                    <th className="text-right py-2 px-3 text-xs">Energy/Unit</th>
+                    <th className="text-right py-2 px-3 text-xs">Moisture (%)</th>
+                    <th className="text-right py-2 px-3 text-xs">Humidity (% RH)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(pagedData as typeof productionTableData).map((d, i) => (
+                    <tr key={i} className="border-b border-border/50 hover:bg-muted/30">
+                      <td className="py-2.5 px-3 mono text-xs text-muted-foreground">{(d as any).timestamp}</td>
+                      <td className="py-2.5 px-3 text-xs">{(d as any).unit}</td>
+                      <td className="py-2.5 px-3 text-xs">{(d as any).line}</td>
+                      <td className="py-2.5 px-3 text-xs font-medium">{(d as any).machine}</td>
+                      <td className="py-2.5 px-3 text-xs mono text-right">{(d as any).production}</td>
+                      <td className="py-2.5 px-3 text-xs mono text-right">{(d as any).consumption?.toLocaleString()}</td>
+                      <td className="py-2.5 px-3 text-xs mono text-right">{(d as any).energyPerUnit}</td>
+                      <td className="py-2.5 px-3 text-xs mono text-right">{(d as any).moisture}</td>
+                      <td className="py-2.5 px-3 text-xs mono text-right">{(d as any).humidity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+              <span className="text-xs text-muted-foreground">Page {page} of {totalPages} ({currentTableData.length} records)</span>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-7 w-7" disabled={page <= 1} onClick={() => setPage(page - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" disabled={page >= totalPages} onClick={() => setPage(page + 1)}><ChevronRight className="h-4 w-4" /></Button>
+              </div>
+            </div>
+            {periodSelector}
           </motion.div>
         </TabsContent>
       </Tabs>
